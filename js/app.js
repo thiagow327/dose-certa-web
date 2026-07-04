@@ -24,7 +24,7 @@ function carregarRemedios() {
                 lista.innerHTML += '<div class="col-sm-6 col-lg-3">' +
                     '<div class="card p-3">' +
                     '<strong>' + r.nome + '</strong>' +
-                    '<p class="mb-0">' + r.dosagem + 'mg · ' + r.unidade + '</p>' +
+                    '<p class="mb-0">' + r.dosagem + ' ' + r.unidade + '</p>' +
                     '<p class="mb-0">A cada ' + r.frequencia_horas + 'h · ' + r.horario_inicio + '</p>' +
                     '<button class="btn btn-outline-danger btn-sm mt-2 w-100" onclick="deletarRemedio(' + r.id + ')">Remover</button>' +
                     '</div></div>';
