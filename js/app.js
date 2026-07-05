@@ -24,11 +24,31 @@ function carregarRemedios() {
                 lista.innerHTML += '<div class="col-sm-6 col-lg-3">' +
                     '<div class="card p-3">' +
                     '<strong>' + r.nome + '</strong>' +
-                    '<p class="mb-0">' + r.dosagem + ' ' + r.unidade + '</p>' +
-                    '<p class="mb-0">A cada ' + r.frequencia_horas + 'h · ' + r.horario_inicio + '</p>' +
+                    '<p class="mb-0">' + r.dosagem + ' ' + r.unidade + ' à cada ' + r.frequencia_horas + 'h' +
+                    '<div id="detalhe-' + r.id + '" class="small text-muted mt-2"></div>' +
+                    '<button class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="verDetalhes(' + r.id + ')">Detalhes</button>' +
                     '<button class="btn btn-outline-danger btn-sm mt-2 w-100" onclick="deletarRemedio(' + r.id + ')">Remover</button>' +
                     '</div></div>';
             });
+        });
+}
+
+function verDetalhes(id) {
+    var div = document.getElementById('detalhe-' + id);
+
+    if (div.innerHTML) {
+        div.innerHTML = '';
+        return;
+    }
+
+    fetch(API_URL + '/remedio?id=' + id)
+        .then(function (res) { return res.json(); })
+        .then(function (r) {
+            div.innerHTML =
+                'Dosagem: ' + r.dosagem + 'mg (' + r.unidade + ')<br>' +
+                'Frequência: a cada ' + r.frequencia_horas + 'h<br>' +
+                'Início: ' + r.horario_inicio + '<br>' +
+                'Observações: ' + (r.observacoes || '—');
         });
 }
 
