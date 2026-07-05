@@ -1,5 +1,7 @@
 const API_URL = "http://localhost:5000";
 
+let remedioEditandoId = null;
+
 function carregarTudo() {
     carregarRemedios();
     carregarSelectRemedios('dose-remedio');
@@ -26,8 +28,11 @@ function carregarRemedios() {
                     '<strong>' + r.nome + '</strong>' +
                     '<p class="mb-0">' + r.dosagem + ' ' + r.unidade + ' à cada ' + r.frequencia_horas + 'h' +
                     '<div id="detalhe-' + r.id + '" class="small text-muted mt-2"></div>' +
-                    '<button class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="verDetalhes(' + r.id + ')">Detalhes</button>' +
-                    '<button class="btn btn-outline-danger btn-sm mt-2 w-100" onclick="deletarRemedio(' + r.id + ')">Remover</button>' +
+                    '<div class="d-flex gap-1 mt-2">' +
+                    '<button class="btn btn-outline-secondary btn-sm flex-fill" onclick="verDetalhes(' + r.id + ')">Detalhes</button>' +
+                    '<button class="btn btn-outline-primary btn-sm flex-fill" onclick="editarRemedio(' + r.id + ')">Editar</button>' +
+                    '<button class="btn btn-outline-danger btn-sm flex-fill" onclick="deletarRemedio(' + r.id + ')">Remover</button>' +
+                    '</div>' +
                     '</div></div>';
             });
         });
@@ -62,8 +67,12 @@ function cadastrarRemedio() {
         observacoes: document.getElementById('observacoes').value || null
     };
 
-    fetch(API_URL + '/remedio', {
-        method: 'POST',
+    var editando = remedioEditandoId !== null;
+    var url = editando ? API_URL + '/remedio?id=' + remedioEditandoId : API_URL + '/remedio';
+    var metodo = editando ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: metodo,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     })
@@ -71,15 +80,43 @@ function cadastrarRemedio() {
         .then(function (data) {
             var msg = document.getElementById('msg-cadastrar');
             if (data.id) {
-                msg.textContent = 'Remédio cadastrado com sucesso!';
+                msg.textContent = editando ? 'Remédio atualizado com sucesso!' : 'Remédio cadastrado com sucesso!';
                 msg.style.color = 'green';
-                document.getElementById('form-cadastrar').reset();
+                cancelarEdicao();
                 carregarTudo();
             } else {
-                msg.textContent = data.message || 'Erro ao cadastrar.';
+                msg.textContent = data.message || 'Erro ao salvar.';
                 msg.style.color = 'red';
             }
         });
+}
+
+function editarRemedio(id) {
+    fetch(API_URL + '/remedio?id=' + id)
+        .then(function (res) { return res.json(); })
+        .then(function (r) {
+            document.getElementById('nome').value = r.nome;
+            document.getElementById('dosagem').value = r.dosagem;
+            document.getElementById('unidade').value = r.unidade;
+            document.getElementById('frequencia').value = r.frequencia_horas;
+            document.getElementById('horario').value = r.horario_inicio;
+            document.getElementById('observacoes').value = r.observacoes || '';
+
+            remedioEditandoId = id;
+            document.getElementById('titulo-cadastrar').textContent = 'Editar Remédio';
+            document.getElementById('btn-cadastrar').textContent = 'Salvar alterações';
+            document.getElementById('btn-cancelar').classList.remove('d-none');
+            document.getElementById('msg-cadastrar').textContent = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+}
+
+function cancelarEdicao() {
+    remedioEditandoId = null;
+    document.getElementById('form-cadastrar').reset();
+    document.getElementById('titulo-cadastrar').textContent = 'Cadastrar Remédio';
+    document.getElementById('btn-cadastrar').textContent = 'Cadastrar';
+    document.getElementById('btn-cancelar').classList.add('d-none');
 }
 
 function deletarRemedio(id) {
